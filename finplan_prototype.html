@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>ФинПлан — личный финансовый планировщик</title>
+<style>
+:root{
+  --bg:#f5f7fb;--card:#fff;--text:#18202f;--muted:#6b7280;--line:#e5e7eb;
+  --accent:#2563eb;--accent2:#1d4ed8;--soft:#eff6ff;--green:#16a34a;
+  --orange:#ea580c;--red:#dc2626;--shadow:0 10px 30px rgba(15,23,42,.07);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1180px;margin:auto;padding:20px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.logo{font-size:23px;font-weight:800;letter-spacing:-.5px}
+.logo span{color:var(--accent)}
+.header-note{color:var(--muted);font-size:13px}
+.hero{background:linear-gradient(135deg,#111827,#243b75);color:white;border-radius:24px;padding:28px;box-shadow:var(--shadow);margin-bottom:18px}
+.hero h1{font-size:clamp(27px,4vw,42px);line-height:1.05;margin:0 0 10px;letter-spacing:-1.2px}
+.hero p{margin:0;color:#dbe4ff;max-width:720px}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.card h2{font-size:19px;margin:0 0 5px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{display:block;font-size:13px;font-weight:650;margin-bottom:6px}
+.field input{width:100%;padding:12px 13px;border:1px solid #d7dce5;border-radius:11px;outline:none;background:#fff}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #dbeafe}
+.full{grid-column:1/-1}
+.primary{width:100%;border:0;background:var(--accent);color:#fff;padding:13px 16px;border-radius:12px;font-weight:750;margin-top:14px}
+.primary:hover{background:var(--accent2)}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.metric{padding:15px;border:1px solid var(--line);border-radius:14px;background:#fafbfc}
+.metric .v{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.metric .l{font-size:12px;color:var(--muted);margin-top:2px}
+.metric.good .v{color:var(--green)}
+.goalbox{margin-top:16px;padding:16px;border-radius:14px;background:var(--soft);border:1px solid #dbeafe}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.row strong{font-size:14px}
+.range{width:100%;accent-color:var(--accent);margin:12px 0}
+.big{font-size:31px;font-weight:850;letter-spacing:-1px}
+.progress{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:12px 0 7px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.scenarios{display:grid;gap:9px;margin-top:14px}
+.sc{display:flex;justify-content:space-between;padding:11px 12px;border:1px solid var(--line);border-radius:11px}
+.sc span{color:var(--muted)}
+.chart{height:190px;display:flex;align-items:flex-end;gap:8px;padding:18px 5px 0;border-bottom:1px solid var(--line)}
+.barwrap{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}
+.bar{width:min(42px,70%);min-height:3px;background:var(--accent);border-radius:7px 7px 0 0}
+.barlabel{font-size:10px;color:var(--muted)}
+.barvalue{font-size:10px;font-weight:700}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.secondary{border:1px solid var(--line);background:#fff;color:var(--text);padding:10px 13px;border-radius:10px;font-weight:650}
+.secondary:hover{background:#f8fafc}
+.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:16px}
+.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:9px 13px;border-radius:10px;color:var(--muted);font-weight:650}
+.tab.active{background:#111827;color:#fff;border-color:#111827}
+.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:22px 0}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:800px){
+ .app{padding:12px}.grid{grid-template-columns:1fr}.hero{padding:22px;border-radius:19px}
+ header{align-items:flex-start}.header-note{display:none}.card{padding:18px}
+}
+@media(max-width:500px){
+ .fields,.results{grid-template-columns:1fr}.hero h1{font-size:30px}
+ .metric .v{font-size:22px}.big{font-size:27px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">Фин<span>План</span></div>
+  <div class="header-note">Ваши данные остаются в вашем браузере</div>
+</header>
+
+<section class="hero">
+  <h1>Планируйте деньги,<br>а не угадывайте.</h1>
+  <p>Введите несколько своих цифр и посмотрите, сколько у вас остаётся, когда вы достигнете цели и что изменится при другом темпе накоплений.</p>
+</section>
+
+<div class="tabs">
+  <button class="tab active" data-tab="plan">Мой план</button>
+  <button class="tab" data-tab="goal">Цель</button>
+  <button class="tab" data-tab="home">Покупка / ипотека</button>
+</div>
+
+<section id="plan" class="tabpage">
+<div class="grid">
+  <div class="card">
+    <h2>Мои деньги</h2>
+    <p class="sub">Данные сохраняются только на этом устройстве в браузере.</p>
+    <div class="fields">
+      <div class="field"><label>Доход в месяц, ₽</label><input id="income" type="number" min="0" step="1000" value="120000"></div>
+      <div class="field"><label>Жильё, ₽</label><input id="housing" type="number" min="0" step="1000" value="30000"></div>
+      <div class="field"><label>Еда, ₽</label><input id="food" type="number" min="0" step="1000" value="20000"></div>
+      <div class="field"><label>Транспорт, ₽</label><input id="transport" type="number" min="0" step="1000" value="10000"></div>
+      <div class="field"><label>Другие расходы, ₽</label><input id="other" type="number" min="0" step="1000" value="15000"></div>
+      <div class="field"><label>Уже накоплено, ₽</label><input id="saved" type="number" min="0" step="10000" value="300000"></div>
+      <div class="field full"><label>Сколько хотите откладывать каждый месяц, ₽</label><input id="monthly" type="number" min="0" step="1000" value="30000"></div>
+    </div>
+    <button class="primary" onclick="calculate()">Пересчитать</button>
+    <div class="actions">
+      <button class="secondary" onclick="resetData()">Сбросить</button>
+      <button class="secondary" onclick="downloadData()">Скачать мои данные</button>
+    </div>
+    <div class="note">Никакие введённые значения не отправляются на сервер в этой версии.</div>
+  </div>
+
+  <div class="card">
+    <h2>Ваш результат</h2>
+    <p class="sub">Картина месяца в одном экране.</p>
+    <div class="results">
+      <div class="metric good"><div class="v" id="free">—</div><div class="l">остаётся после расходов</div></div>
+      <div class="metric"><div class="v" id="rate">—</div><div class="l">доля накоплений</div></div>
+      <div class="metric"><div class="v" id="yearSave">—</div><div class="l">накопите за год</div></div>
+      <div class="metric"><div class="v" id="after2">—</div><div class="l">будет через 2 года</div></div>
+    </div>
+    <div class="goalbox">
+      <div class="row"><strong>Финансовая подушка</strong><span id="monthsBuffer">—</span></div>
+      <div class="progress"><i id="bufferProgress" style="width:0%"></i></div>
+      <div class="note">Ориентир: 6 месяцев обязательных расходов.</div>
+    </div>
+    <div class="chart" id="chart"></div>
+  </div>
+</div>
+</section>
+
+<section id="goal" class="tabpage hidden">
+<div class="grid">
+  <div class="card">
+    <h2>Накопление на цель</h2>
+    <p class="sub">Проверьте, сколько времени понадобится для любой покупки.</p>
+    <div class="fields">
+      <div class="field"><label>Стоимость цели, ₽</label><input id="goalCost" type="number" min="0" step="10000" value="1500000"></div>
+      <div class="field"><label>Уже есть, ₽</label><input id="goalSaved" type="number" min="0" step="10000" value="300000"></div>
+      <div class="field full"><label>Откладывать в месяц, ₽</label><input id="goalMonthly" type="range" min="1000" max="150000" step="1000" value="30000" class="range"></div>
+    </div>
+    <div class="row"><span>Темп накопления</span><strong id="goalMonthlyValue">30 000 ₽/мес.</strong></div>
+  </div>
+  <div class="card">
+    <h2 id="goalTitle">До цели</h2>
+    <div class="big" id="goalTime">—</div>
+    <div class="progress"><i id="goalProgress" style="width:20%"></i></div>
+    <div class="row"><span>Осталось</span><strong id="goalLeft">—</strong></div>
+    <div class="scenarios" id="scenarios"></div>
+  </div>
+</div>
+</section>
+
+<section id="home" class="tabpage hidden">
+<div class="grid">
+  <div class="card">
+    <h2>Покупка / первый взнос</h2>
+    <p class="sub">Простой сценарий без привязки к конкретному банку.</p>
+    <div class="fields">
+      <div class="field"><label>Цена покупки, ₽</label><input id="homePrice" type="number" min="0" step="100000" value="6000000"></div>
+      <div class="field"><label>Первоначальный взнос, %</label><input id="downPct" type="number" min="0" max="100" step="1" value="20"></div>
+      <div class="field"><label>Уже накоплено, ₽</label><input id="homeSaved" type="number" min="0" step="10000" value="300000"></div>
+      <div class="field"><label>Откладываю в месяц, ₽</label><input id="homeMonthly" type="number" min="0" step="1000" value="30000"></div>
+      <div class="field full"><label>Предполагаемая ставка, % годовых</label><input id="homeRate" type="number" min="0" step=".1" value="18"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Путь к первому взносу</h2>
+    <div class="results">
+      <div class="metric"><div class="v" id="downAmount">—</div><div class="l">нужен взнос</div></div>
+      <div class="metric"><div class="v" id="downLeft">—</div><div class="l">осталось накопить</div></div>
+      <div class="metric"><div class="v" id="downTime">—</div><div class="l">примерный срок</div></div>
+      <div class="metric"><div class="v" id="loanAmount">—</div><div class="l">сумма кредита</div></div>
+    </div>
+    <div class="goalbox">
+      <div class="row"><strong>Ориентировочный платёж</strong><strong id="payment">—</strong></div>
+      <div class="note">Расчёт аннуитетного платежа. Это демонстрационный расчёт, не предложение банка.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>ФинПлан — прототип. Не является финансовой или инвестиционной рекомендацией.</footer>
+</div>
+
+<script>
+const ids=['income','housing','food','transport','other','saved','monthly','goalCost','goalSaved','goalMonthly','homePrice','downPct','homeSaved','homeMonthly','homeRate'];
+const $=id=>document.getElementById(id);
+const num=id=>Math.max(0,Number($(id).value)||0);
+const money=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(n))+' ₽';
+const compact=n=>new Intl.NumberFormat('ru-RU',{notation:'compact',maximumFractionDigits:1}).format(Math.round(n))+' ₽';
+
+function saveLocal(){
+  const d={};ids.forEach(id=>d[id]=$(id).value);localStorage.setItem('finplan_v1',JSON.stringify(d));
+}
+function loadLocal(){
+  try{const d=JSON.parse(localStorage.getItem('finplan_v1')||'{}');ids.forEach(id=>{if(d[id]!==undefined)$(id).value=d[id]})}catch(e){}
+}
+function calculate(){
+  const income=num('income'), expenses=num('housing')+num('food')+num('transport')+num('other');
+  const free=Math.max(0,income-expenses), monthly=num('monthly'), saved=num('saved');
+  $('free').textContent=money(free);
+  $('rate').textContent=income?Math.round(monthly/income*100)+'%':'0%';
+  $('yearSave').textContent=money(saved+monthly*12);
+  $('after2').textContent=money(saved+monthly*24);
+  const required=expenses*6;
+  $('monthsBuffer').textContent=expenses?((saved/expenses).toFixed(1)+' мес.'):'—';
+  $('bufferProgress').style.width=Math.min(100,required?saved/required*100:0)+'%';
+  let bars='';
+  for(let i=1;i<=6;i++){
+    const val=saved+monthly*i*2;
+    const max=saved+monthly*12;
+    const h=max?Math.max(4,val/max*100):4;
+    bars+=`<div class="barwrap"><b class="barvalue">${compact(val)}</b><div class="bar" style="height:${h}%"></div><span class="barlabel">${i*2} мес.</span></div>`;
+  }
+  $('chart').innerHTML=bars;
+  saveLocal();goalCalc();homeCalc();
+}
+function goalCalc(){
+  const cost=num('goalCost'), saved=num('goalSaved'), monthly=num('goalMonthly');
+  $('goalMonthlyValue').textContent=money(monthly)+'/мес.';
+  const left=Math.max(0,cost-saved); $('goalLeft').textContent=money(left);
+  let months=monthly?Math.ceil(left/monthly):Infinity;
+  $('goalTime').textContent=months===Infinity?'—':months+' '+plural(months,['месяц','месяца','месяцев']);
+  $('goalProgress').style.width=Math.min(100,cost?saved/cost*100:0)+'%';
+  $('goalTitle').textContent=left<=0?'Цель уже достигнута!':'До цели';
+  const arr=[15000,30000,50000,75000];
+  $('scenarios').innerHTML=arr.map(v=>{
+    const m=v?Math.ceil(left/v):0;
+    return `<div class="sc"><span>${money(v)} в месяц</span><strong>${m} мес.</strong></div>`;
+  }).join('');
+  saveLocal();
+}
+function homeCalc(){
+  const price=num('homePrice'), pct=Math.min(100,num('downPct')), saved=num('homeSaved'), monthly=num('homeMonthly'), rate=num('homeRate');
+  const down=price*pct/100, left=Math.max(0,down-saved), months=monthly?Math.ceil(left/monthly):Infinity, loan=Math.max(0,price-down);
+  $('downAmount').textContent=money(down);$('downLeft').textContent=money(left);
+  $('downTime').textContent=months===Infinity?'—':months+' мес.';$('loanAmount').textContent=money(loan);
+  const n=240, r=rate/100/12;
+  const p=r?loan*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):loan/n;
+  $('payment').textContent=money(p)+'/мес.';
+  saveLocal();
+}
+function plural(n,w){n=Math.abs(n)%100;const x=n%10;return n>10&&n<20?w[2]:x===1?w[0]:x>=2&&x<=4?w[1]:w[2]}
+function resetData(){localStorage.removeItem('finplan_v1');location.reload()}
+function downloadData(){
+  const d={};ids.forEach(id=>d[id]=Number($(id).value)||0);
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='finplan.json';a.click();URL.revokeObjectURL(a.href);
+}
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.tabpage').forEach(x=>x.classList.add('hidden'));$(btn.dataset.tab).classList.remove('hidden');
+}));
+ids.forEach(id=>$(id).addEventListener('input',()=>{
+  if(id.startsWith('goal'))goalCalc();else if(id.startsWith('home'))homeCalc();else calculate();
+}));
+loadLocal();calculate();
+</script>
+</body>
+</html>
